@@ -1,0 +1,66 @@
+# ===========================
+# Laravel & PHP related
+# ===========================
+vendor/
+node_modules/
+storage/*.key
+storage/framework/cache/*
+storage/framework/sessions/*
+storage/framework/views/*
+storage/logs/*
+bootstrap/cache/*.php
+
+# Keep necessary framework files (optional adjustment)
+!bootstrap/cache/.gitignore
+!storage/framework/.gitignore
+!storage/logs/.gitignore
+
+# ===========================
+# Environment & config files
+# ===========================
+.env
+.env.*
+!.env.example
+
+# ===========================
+# Frontend build artifacts
+# ===========================
+/public/hot
+/public/storage
+/public/vendor
+/public/mix-manifest.json
+
+# React / Vite build outputs
+/public/build
+/public/js
+/public/css
+
+# ===========================
+# OS / Editor / Tooling files
+# ===========================
+*.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+*.cache
+*.swp
+*.swo
+
+# ===========================
+# Git related
+# ===========================
+.git
+.gitignore
+.gitattributes
+
+# ===========================
+# Docker related
+# ===========================
+Dockerfile
+docker-compose.yml
+.dockerignore

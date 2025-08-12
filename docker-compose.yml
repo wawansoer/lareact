@@ -1,0 +1,76 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: ./docker/Dockerfile
+    ports:
+      - 8000
+    networks:
+      - lareact_network
+    environment:
+      APP_NAME: ${APP_NAME}
+      APP_ENV: production
+      APP_KEY: ${APP_KEY}
+      APP_DEBUG: "false"
+      APP_URL: ${APP_URL:-http://localhost}
+      DB_CONNECTION: pgsql
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_DATABASE: ${DB_DATABASE:-laravel}
+      DB_USERNAME: ${DB_USERNAME:-laravel_user}
+      DB_PASSWORD: ${DB_PASSWORD:-password}
+      CACHE_DRIVER: memcached
+      MEMCACHED_HOST: cache
+      MEMCACHED_PORT: 11211
+      QUEUE_CONNECTION: redis
+      REDIS_HOST: redis
+      SWOOLE_WORKER_NUM: ${SWOOLE_WORKER_NUM:-2}
+      SWOOLE_TASK_WORKER_NUM: ${SWOOLE_TASK_WORKER_NUM:-4}
+
+    volumes:
+      - "../app/app_storage:/app/storage" 
+      - "../app/app_bootstrap_cache:/app/bootstrap/cache"
+
+    depends_on:
+      - db
+      - cache
+      - redis
+
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${DB_DATABASE:-laravel}
+      POSTGRES_USER: ${DB_USERNAME:-laravel_user}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-password}
+    volumes:
+      - "../pgdata:/var/lib/postgresql/data"
+    expose:
+      - "5432"
+    networks:
+      - lareact_network
+
+  cache:
+    image: memcached:alpine
+    restart: unless-stopped
+    expose:
+      - "11211"
+    networks:
+      - lareact_network
+
+  redis:
+    image: redis:alpine
+    restart: unless-stopped
+    expose:
+      - "6379"
+    networks:
+      - lareact_network
+
+volumes:
+  pgdata:
+  app_storage:
+  app_bootstrap_cache:
+
+networks:
+  lareact_network:
+    driver: bridge
