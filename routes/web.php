@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Auth\GoogleSignInController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -13,5 +14,18 @@ Route::middleware(['auth', 'verified'])->group(function () {
     })->name('dashboard');
 });
 
-require __DIR__.'/settings.php';
+/*
+|--------------------------------------------------------------------------
+| Google Authentication Routes
+|--------------------------------------------------------------------------
+*/
+Route::get('/auth/google/redirect', [GoogleSignInController::class, 'redirect'])->name('google.redirect');
+Route::get('/auth/google/callback', [GoogleSignInController::class, 'callback'])->name('google.callback');
+
+/*
+|--------------------------------------------------------------------------
+| Another Route
+|--------------------------------------------------------------------------
+*/
 require __DIR__.'/auth.php';
+require __DIR__.'/settings.php';
