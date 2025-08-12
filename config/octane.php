@@ -232,7 +232,7 @@ return [
     'swoole' => [
         'server_options' => [
             'worker_num' => env('SWOOLE_WORKER_NUM', 'auto'),   // concurrency
-            'task_worker_num' => env('SWOOLE_TASK_WORKER_NUM', 'auto'),// background tasks
+            'task_worker_num' => env('SWOOLE_TASK_WORKER_NUM', 'auto'), // background tasks
             'max_request' => 5000,                 // recycle workers after N requests
             'max_wait_time' => 60,                 // graceful shutdown wait
             'reload_async' => true,                // async worker reload
@@ -245,6 +245,5 @@ return [
             'http_compression' => true,            // gzip/deflate
         ],
     ],
-
 
 ];
