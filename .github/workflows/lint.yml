@@ -1,45 +1,43 @@
-name: linter
+name: Lint
 
 on:
   push:
     branches:
-      - develop
-      - master
+      - main
   pull_request:
-    branches:
-      - develop
-      - master
-
-permissions:
-  contents: write
 
 jobs:
-  quality:
+  pint:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
 
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
-          php-version: '8.4'
+          php-version: '8.3'
+          extensions: dom, fileinfo, mbstring, xml
+          tools: composer
+          coverage: none
 
-      - name: Install Dependencies
-        run: |
-          composer install -q --no-ansi --no-interaction --no-scripts --no-progress --prefer-dist
-          npm install
+      - name: Install Composer dependencies
+        run: composer install --prefer-dist --no-progress
 
       - name: Run Pint
-        run: vendor/bin/pint
+        run: vendor/bin/pint --test
 
-      - name: Format Frontend
-        run: npm run format
+  eslint:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
 
-      - name: Lint Frontend
-        run: npm run lint
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
 
-      # - name: Commit Changes
-      #   uses: stefanzweifel/git-auto-commit-action@v5
-      #   with:
-      #     commit_message: fix code style
-      #     commit_options: '--no-verify'
+      - name: Install Node dependencies
+        run: bun install
+
+      - name: Run ESLint
+        run: bun run lint
