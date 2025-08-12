@@ -38,7 +38,7 @@
 
         <link rel="preconnect" href="https://fonts.googleapis.com">
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-        <link href="https://fonts.googleapis.com/css2?family=Chivo+Mono:wght@400;700&family=DM+Sans:wght@400;500;700&family=IBM+Plex+Mono:wght@400;700&display=swap" rel="stylesheet">
+        <link href="https://fonts.googleapis.com/css2?family=Chivo+Mono:ital,wght@1,500&family=DM+Sans:ital,opsz,wght@1,9..40,500&family=IBM+Plex+Mono:ital,wght@0,500;0,600;1,500;1,600&display=swap" rel="stylesheet">
 
         @routes
         @viteReactRefresh
