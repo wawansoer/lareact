@@ -1,0 +1,7 @@
+#!/command/execlineb -P
+with-contenv
+cd /var/www/html
+foreground { php artisan migrate --force }
+foreground { php artisan storage:link }
+foreground { php artisan optimize }
+foreground { php artisan schedule:interrupt  }
