@@ -24,6 +24,18 @@ Route::get('/auth/google/callback', [GoogleSignInController::class, 'callback'])
 
 /*
 |--------------------------------------------------------------------------
+| User & RBAC Management
+|--------------------------------------------------------------------------
+*/
+Route::middleware(['auth', 'verified'])->group(function () {
+    Route::resource('users', \App\Http\Controllers\UserController::class);
+    Route::resource('tenants', \App\Http\Controllers\TenantController::class);
+    Route::resource('roles', \App\Http\Controllers\RoleController::class);
+    Route::resource('permissions', \App\Http\Controllers\PermissionController::class);
+});
+
+/*
+|--------------------------------------------------------------------------
 | Another Route
 |--------------------------------------------------------------------------
 */
