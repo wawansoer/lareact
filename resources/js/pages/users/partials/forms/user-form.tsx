@@ -1,7 +1,7 @@
 import InputError from '@/components/input-error';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Input } from '@/components/ui/input';
+import { Input, PasswordInput } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { User } from '@/types';
 import { useForm } from '@inertiajs/react';
@@ -48,12 +48,12 @@ export function UserForm({ user, children }: { user?: User; children: React.Reac
           </div>
           <div>
             <Label htmlFor="password">Password</Label>
-            <Input id="password" type="password" value={data.password} onChange={(e) => setData('password', e.target.value)} />
+            <PasswordInput id="password" type="password" value={data.password} onChange={(e) => setData('password', e.target.value)} />
             <InputError message={errors.password} />
           </div>
           <div>
             <Label htmlFor="password_confirmation">Confirm Password</Label>
-            <Input
+            <PasswordInput
               id="password_confirmation"
               type="password"
               value={data.password_confirmation}
