@@ -32,7 +32,7 @@ class TenantController extends Controller
     {
         Tenant::create($request->validated());
 
-        return redirect()->route('users.index')->with('success', 'Tenant created successfully.');
+        return redirect()->route('users.index', ['tab' => 'tenants'])->with('success', 'Tenant created successfully.');
     }
 
     /**
@@ -58,7 +58,7 @@ class TenantController extends Controller
     {
         $tenant->update($request->validated());
 
-        return redirect()->route('users.index')->with('success', 'Tenant updated successfully.');
+        return redirect()->route('users.index', ['tab' => 'tenants'])->with('success', 'Tenant updated successfully.');
     }
 
     /**
@@ -68,6 +68,6 @@ class TenantController extends Controller
     {
         $tenant->delete();
 
-        return redirect()->route('users.index')->with('success', 'Tenant deleted successfully.');
+        return redirect()->route('users.index', ['tab' => 'tenants'])->with('success', 'Tenant deleted successfully.');
     }
 }

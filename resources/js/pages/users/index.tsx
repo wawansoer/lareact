@@ -1,7 +1,8 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import AppLayout from '@/layouts/app-layout';
 import { PageProps, Paginated, Permission, Role, Tenant, User } from '@/types';
-import { Head } from '@inertiajs/react';
+import { Head, router } from '@inertiajs/react';
+import { useCallback, useState } from 'react';
 import { PermissionsTable } from './partials/tables/permissions-table';
 import { RolesTable } from './partials/tables/roles-table';
 import { TenantsTable } from './partials/tables/tenants-table';
@@ -13,6 +14,23 @@ export default function Index({
   roles,
   permissions,
 }: PageProps<{ users: Paginated<User>; tenants: Paginated<Tenant>; roles: Paginated<Role>; permissions: Paginated<Permission> }>) {
+  const [activeTab, setActiveTab] = useState('users');
+
+  const handleTabChange = useCallback(
+    (tab: string) => {
+      setActiveTab(tab);
+      router.get(
+        route('users.index', { tab }),
+        {},
+        {
+          preserveState: true,
+          replace: true,
+        },
+      );
+    },
+    [setActiveTab],
+  );
+
   return (
     <AppLayout>
       <Head title="User Management" />
@@ -26,25 +44,17 @@ export default function Index({
           </div>
         </div>
 
-        <Tabs defaultValue="users" className="mt-4">
+        <Tabs value={activeTab} onValueChange={handleTabChange} className="mt-4">
           <TabsList>
             <TabsTrigger value="users">Users</TabsTrigger>
             <TabsTrigger value="tenants">Tenants</TabsTrigger>
             <TabsTrigger value="roles">Roles</TabsTrigger>
             <TabsTrigger value="permissions">Permissions</TabsTrigger>
           </TabsList>
-          <TabsContent value="users">
-            <UsersTable users={users} />
-          </TabsContent>
-          <TabsContent value="tenants">
-            <TenantsTable tenants={tenants} />
-          </TabsContent>
-          <TabsContent value="roles">
-            <RolesTable roles={roles} />
-          </TabsContent>
-          <TabsContent value="permissions">
-            <PermissionsTable permissions={permissions} />
-          </TabsContent>
+          <TabsContent value="users">{users && <UsersTable users={users} />}</TabsContent>
+          <TabsContent value="tenants">{tenants && <TenantsTable tenants={tenants} />}</TabsContent>
+          <TabsContent value="roles">{roles && <RolesTable roles={roles} />}</TabsContent>
+          <TabsContent value="permissions">{permissions && <PermissionsTable permissions={permissions} />}</TabsContent>
         </Tabs>
       </div>
     </AppLayout>

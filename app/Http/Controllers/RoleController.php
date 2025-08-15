@@ -32,7 +32,7 @@ class RoleController extends Controller
     {
         Role::create($request->validated());
 
-        return redirect()->route('users.index')->with('success', 'Role created successfully.');
+        return redirect()->route('users.index', ['tab' => 'roles'])->with('success', 'Role created successfully.');
     }
 
     /**
@@ -58,7 +58,7 @@ class RoleController extends Controller
     {
         $role->update($request->validated());
 
-        return redirect()->route('users.index')->with('success', 'Role updated successfully.');
+        return redirect()->route('users.index', ['tab' => 'roles'])->with('success', 'Role updated successfully.');
     }
 
     /**
@@ -68,6 +68,6 @@ class RoleController extends Controller
     {
         $role->delete();
 
-        return redirect()->route('users.index')->with('success', 'Role deleted successfully.');
+        return redirect()->route('users.index', ['tab' => 'roles'])->with('success', 'Role deleted successfully.');
     }
 }

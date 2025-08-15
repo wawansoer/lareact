@@ -61,7 +61,7 @@ abstract class BaseService
      */
     protected function applyColumnFilters(Builder $query, Request $request): void
     {
-        foreach ($request->except(['page', 'per_page', 'sort', 'global']) as $column => $value) {
+        foreach ($request->except(['page', 'per_page', 'sort', 'global', 'tab']) as $column => $value) {
             if (! empty($value)) {
                 $query->where($column, 'like', "%{$value}%");
             }

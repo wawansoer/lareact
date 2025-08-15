@@ -1,45 +1,33 @@
-import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table'
-import { Paginated, Permission } from '@/types'
-import { router, usePage } from '@inertiajs/react'
+import { DataTablePagination } from '@/components/data-table-pagination';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Checkbox } from '@/components/ui/checkbox';
+import { DropdownMenu, DropdownMenuCheckboxItem, DropdownMenuContent, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { Input } from '@/components/ui/input';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Paginated, Permission } from '@/types';
+import { router, usePage } from '@inertiajs/react';
 import {
   ColumnDef,
   ColumnFiltersState,
+  ColumnPinningState,
   flexRender,
   getCoreRowModel,
   getFilteredRowModel,
   getPaginationRowModel,
   getSortedRowModel,
+  PaginationState,
   SortingState,
   useReactTable,
   VisibilityState,
-  ColumnPinningState,
-  PaginationState,
-} from '@tanstack/react-table'
-import { useEffect, useMemo, useState } from 'react'
-import { PermissionForm } from '../forms/permission-form'
-import { Input } from '@/components/ui/input'
-import {
-  DropdownMenu,
-  DropdownMenuCheckboxItem,
-  DropdownMenuContent,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
-import { Checkbox } from '@/components/ui/checkbox'
-import { DataTablePagination } from '@/components/data-table-pagination'
+} from '@tanstack/react-table';
+import { useEffect, useMemo, useState } from 'react';
+import { PermissionForm } from '../forms/permission-form';
 
 export function PermissionsTable({ permissions }: { permissions: Paginated<Permission> }) {
-  const { url } = usePage()
-  const data = useMemo(() => permissions.data, [permissions])
-  const totalRows = useMemo(() => permissions.total, [permissions])
+  const { url } = usePage();
+  const data = useMemo(() => permissions.data, [permissions]);
+  const totalRows = useMemo(() => permissions.total, [permissions]);
 
   const columns = useMemo<ColumnDef<Permission>[]>(
     () => [
@@ -53,11 +41,7 @@ export function PermissionsTable({ permissions }: { permissions: Paginated<Permi
           />
         ),
         cell: ({ row }) => (
-          <Checkbox
-            checked={row.getIsSelected()}
-            onCheckedChange={(value) => row.toggleSelected(!!value)}
-            aria-label="Select row"
-          />
+          <Checkbox checked={row.getIsSelected()} onCheckedChange={(value) => row.toggleSelected(!!value)} aria-label="Select row" />
         ),
         enableSorting: false,
         enableHiding: false,
@@ -72,38 +56,35 @@ export function PermissionsTable({ permissions }: { permissions: Paginated<Permi
       {
         id: 'actions',
         cell: ({ row }) => {
-          const permission = row.original
+          const permission = row.original;
           return (
             <div className="flex gap-2">
               <PermissionForm permission={permission}>
                 <Button variant="outline">Edit</Button>
               </PermissionForm>
-              <Button
-                variant="destructive"
-                onClick={() => router.delete(route('permissions.destroy', permission.id))}
-              >
+              <Button variant="destructive" onClick={() => router.delete(route('permissions.destroy', permission.id))}>
                 Delete
               </Button>
             </div>
-          )
+          );
         },
         enableHiding: false,
       },
     ],
     [],
-  )
+  );
 
-  const [sorting, setSorting] = useState<SortingState>([])
-  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
-  const [globalFilter, setGlobalFilter] = useState('')
-  const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({})
-  const [rowSelection, setRowSelection] = useState({})
-  const [columnOrder, setColumnOrder] = useState<string[]>([])
-  const [columnPinning, setColumnPinning] = useState<ColumnPinningState>({})
+  const [sorting, setSorting] = useState<SortingState>([]);
+  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
+  const [globalFilter, setGlobalFilter] = useState('');
+  const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
+  const [rowSelection, setRowSelection] = useState({});
+  const [columnOrder, setColumnOrder] = useState<string[]>([]);
+  const [columnPinning, setColumnPinning] = useState<ColumnPinningState>({});
   const [pagination, setPagination] = useState<PaginationState>({
     pageIndex: permissions.current_page - 1,
     pageSize: permissions.per_page,
-  })
+  });
 
   const table = useReactTable({
     data,
@@ -135,7 +116,7 @@ export function PermissionsTable({ permissions }: { permissions: Paginated<Permi
     manualPagination: true,
     manualFiltering: true,
     manualSorting: true,
-  })
+  });
 
   useEffect(() => {
     const params = {
@@ -144,13 +125,13 @@ export function PermissionsTable({ permissions }: { permissions: Paginated<Permi
       sort: sorting.length ? `${sorting[0].id},${sorting[0].desc ? 'desc' : 'asc'}` : undefined,
       ...columnFilters.reduce((obj, filter) => ({ ...obj, [filter.id]: filter.value }), {}),
       global: globalFilter || undefined,
-    }
+    };
 
     router.get(url, params, {
       preserveState: true,
       replace: true,
-    })
-  }, [pagination, sorting, columnFilters, globalFilter])
+    });
+  }, [pagination, sorting, columnFilters, globalFilter, url]);
 
   return (
     <Card>
@@ -190,7 +171,7 @@ export function PermissionsTable({ permissions }: { permissions: Paginated<Permi
                     >
                       {column.id}
                     </DropdownMenuCheckboxItem>
-                  )
+                  );
                 })}
             </DropdownMenuContent>
           </DropdownMenu>
@@ -203,11 +184,9 @@ export function PermissionsTable({ permissions }: { permissions: Paginated<Permi
                   {headerGroup.headers.map((header) => {
                     return (
                       <TableHead key={header.id} colSpan={header.colSpan}>
-                        {header.isPlaceholder
-                          ? null
-                          : flexRender(header.column.columnDef.header, header.getContext())}
+                        {header.isPlaceholder ? null : flexRender(header.column.columnDef.header, header.getContext())}
                       </TableHead>
-                    )
+                    );
                   })}
                 </TableRow>
               ))}
@@ -217,9 +196,7 @@ export function PermissionsTable({ permissions }: { permissions: Paginated<Permi
                 table.getRowModel().rows.map((row) => (
                   <TableRow key={row.id} data-state={row.getIsSelected() && 'selected'}>
                     {row.getVisibleCells().map((cell) => (
-                      <TableCell key={cell.id}>
-                        {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                      </TableCell>
+                      <TableCell key={cell.id}>{flexRender(cell.column.columnDef.cell, cell.getContext())}</TableCell>
                     ))}
                   </TableRow>
                 ))
@@ -238,5 +215,5 @@ export function PermissionsTable({ permissions }: { permissions: Paginated<Permi
         </div>
       </CardContent>
     </Card>
-  )
+  );
 }

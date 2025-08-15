@@ -1,45 +1,33 @@
-import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table'
-import { Paginated, User } from '@/types'
-import { router, usePage } from '@inertiajs/react'
+import { DataTablePagination } from '@/components/data-table-pagination';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Checkbox } from '@/components/ui/checkbox';
+import { DropdownMenu, DropdownMenuCheckboxItem, DropdownMenuContent, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { Input } from '@/components/ui/input';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Paginated, User } from '@/types';
+import { router, usePage } from '@inertiajs/react';
 import {
   ColumnDef,
   ColumnFiltersState,
+  ColumnPinningState,
   flexRender,
   getCoreRowModel,
   getFilteredRowModel,
   getPaginationRowModel,
   getSortedRowModel,
+  PaginationState,
   SortingState,
   useReactTable,
   VisibilityState,
-  ColumnPinningState,
-  PaginationState,
-} from '@tanstack/react-table'
-import { useEffect, useMemo, useState } from 'react'
-import { UserForm } from '../forms/user-form'
-import { Input } from '@/components/ui/input'
-import {
-  DropdownMenu,
-  DropdownMenuCheckboxItem,
-  DropdownMenuContent,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
-import { Checkbox } from '@/components/ui/checkbox'
-import { DataTablePagination } from '@/components/data-table-pagination'
+} from '@tanstack/react-table';
+import { useEffect, useMemo, useState } from 'react';
+import { UserForm } from '../forms/user-form';
 
 export function UsersTable({ users }: { users: Paginated<User> }) {
-  const { url } = usePage()
-  const data = useMemo(() => users.data, [users])
-  const totalRows = useMemo(() => users.total, [users])
+  const { url } = usePage();
+  const data = useMemo(() => users.data, [users]);
+  const totalRows = useMemo(() => users.total, [users]);
 
   const columns = useMemo<ColumnDef<User>[]>(
     () => [
@@ -53,11 +41,7 @@ export function UsersTable({ users }: { users: Paginated<User> }) {
           />
         ),
         cell: ({ row }) => (
-          <Checkbox
-            checked={row.getIsSelected()}
-            onCheckedChange={(value) => row.toggleSelected(!!value)}
-            aria-label="Select row"
-          />
+          <Checkbox checked={row.getIsSelected()} onCheckedChange={(value) => row.toggleSelected(!!value)} aria-label="Select row" />
         ),
         enableSorting: false,
         enableHiding: false,
@@ -79,38 +63,35 @@ export function UsersTable({ users }: { users: Paginated<User> }) {
       {
         id: 'actions',
         cell: ({ row }) => {
-          const user = row.original
+          const user = row.original;
           return (
             <div className="flex gap-2">
               <UserForm user={user}>
                 <Button variant="outline">Edit</Button>
               </UserForm>
-              <Button
-                variant="destructive"
-                onClick={() => router.delete(route('users.destroy', user.id))}
-              >
+              <Button variant="destructive" onClick={() => router.delete(route('users.destroy', user.id))}>
                 Delete
               </Button>
             </div>
-          )
+          );
         },
         enableHiding: false,
       },
     ],
     [],
-  )
+  );
 
-  const [sorting, setSorting] = useState<SortingState>([])
-  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
-  const [globalFilter, setGlobalFilter] = useState('')
-  const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({})
-  const [rowSelection, setRowSelection] = useState({})
-  const [columnOrder, setColumnOrder] = useState<string[]>([])
-  const [columnPinning, setColumnPinning] = useState<ColumnPinningState>({})
+  const [sorting, setSorting] = useState<SortingState>([]);
+  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
+  const [globalFilter, setGlobalFilter] = useState('');
+  const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
+  const [rowSelection, setRowSelection] = useState({});
+  const [columnOrder, setColumnOrder] = useState<string[]>([]);
+  const [columnPinning, setColumnPinning] = useState<ColumnPinningState>({});
   const [pagination, setPagination] = useState<PaginationState>({
     pageIndex: users.current_page - 1,
     pageSize: users.per_page,
-  })
+  });
 
   const table = useReactTable({
     data,
@@ -142,7 +123,7 @@ export function UsersTable({ users }: { users: Paginated<User> }) {
     manualPagination: true,
     manualFiltering: true,
     manualSorting: true,
-  })
+  });
 
   useEffect(() => {
     const params = {
@@ -151,13 +132,13 @@ export function UsersTable({ users }: { users: Paginated<User> }) {
       sort: sorting.length ? `${sorting[0].id},${sorting[0].desc ? 'desc' : 'asc'}` : undefined,
       ...columnFilters.reduce((obj, filter) => ({ ...obj, [filter.id]: filter.value }), {}),
       global: globalFilter || undefined,
-    }
+    };
 
     router.get(url, params, {
       preserveState: true,
       replace: true,
-    })
-  }, [pagination, sorting, columnFilters, globalFilter])
+    });
+  }, [pagination, sorting, columnFilters, globalFilter, url]);
 
   return (
     <Card>
@@ -197,7 +178,7 @@ export function UsersTable({ users }: { users: Paginated<User> }) {
                     >
                       {column.id}
                     </DropdownMenuCheckboxItem>
-                  )
+                  );
                 })}
             </DropdownMenuContent>
           </DropdownMenu>
@@ -210,11 +191,9 @@ export function UsersTable({ users }: { users: Paginated<User> }) {
                   {headerGroup.headers.map((header) => {
                     return (
                       <TableHead key={header.id} colSpan={header.colSpan}>
-                        {header.isPlaceholder
-                          ? null
-                          : flexRender(header.column.columnDef.header, header.getContext())}
+                        {header.isPlaceholder ? null : flexRender(header.column.columnDef.header, header.getContext())}
                       </TableHead>
-                    )
+                    );
                   })}
                 </TableRow>
               ))}
@@ -224,9 +203,7 @@ export function UsersTable({ users }: { users: Paginated<User> }) {
                 table.getRowModel().rows.map((row) => (
                   <TableRow key={row.id} data-state={row.getIsSelected() && 'selected'}>
                     {row.getVisibleCells().map((cell) => (
-                      <TableCell key={cell.id}>
-                        {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                      </TableCell>
+                      <TableCell key={cell.id}>{flexRender(cell.column.columnDef.cell, cell.getContext())}</TableCell>
                     ))}
                   </TableRow>
                 ))
@@ -245,5 +222,5 @@ export function UsersTable({ users }: { users: Paginated<User> }) {
         </div>
       </CardContent>
     </Card>
-  )
+  );
 }

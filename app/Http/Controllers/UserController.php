@@ -42,11 +42,13 @@ class UserController extends Controller
      */
     public function index(Request $request): Response
     {
+        $tab = $request->input('tab', 'users');
+
         return Inertia::render('users/index', [
-            'users' => $this->userService->getPaginatedUsers($request),
-            'tenants' => $this->tenantService->getPaginatedTenants($request),
-            'roles' => $this->roleService->getPaginatedRoles($request),
-            'permissions' => $this->permissionService->getPaginatedPermissions($request),
+            'users' => $tab === 'users' ? $this->userService->getPaginatedUsers($request) : Inertia::lazy(fn () => $this->userService->getPaginatedUsers($request)),
+            'tenants' => $tab === 'tenants' ? $this->tenantService->getPaginatedTenants($request) : Inertia::lazy(fn () => $this->tenantService->getPaginatedTenants($request)),
+            'roles' => $tab === 'roles' ? $this->roleService->getPaginatedRoles($request) : Inertia::lazy(fn () => $this->roleService->getPaginatedRoles($request)),
+            'permissions' => $tab === 'permissions' ? $this->permissionService->getPaginatedPermissions($request) : Inertia::lazy(fn () => $this->permissionService->getPaginatedPermissions($request)),
         ]);
     }
 
@@ -69,7 +71,7 @@ class UserController extends Controller
             'password' => Hash::make($request->password),
         ]);
 
-        return redirect()->route('users.index')->with('success', 'User created successfully.');
+        return redirect()->route('users.index', ['tab' => 'users'])->with('success', 'User created successfully.');
     }
 
     /**
@@ -95,7 +97,7 @@ class UserController extends Controller
     {
         $user->update($request->validated());
 
-        return redirect()->route('users.index')->with('success', 'User updated successfully.');
+        return redirect()->route('users.index', ['tab' => 'users'])->with('success', 'User updated successfully.');
     }
 
     /**
@@ -105,6 +107,6 @@ class UserController extends Controller
     {
         $user->delete();
 
-        return redirect()->route('users.index')->with('success', 'User deleted successfully.');
+        return redirect()->route('users.index', ['tab' => 'users'])->with('success', 'User deleted successfully.');
     }
 }
