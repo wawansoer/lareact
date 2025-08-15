@@ -4,27 +4,49 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\User\StoreUserRequest;
 use App\Http\Requests\User\UpdateUserRequest;
-use App\Models\Permission;
-use App\Models\Role;
-use App\Models\Tenant;
 use App\Models\User;
+use App\Services\PermissionService;
+use App\Services\RoleService;
+use App\Services\TenantService;
+use App\Services\UserService;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Inertia\Inertia;
 use Inertia\Response;
 
 class UserController extends Controller
 {
+    protected $userService;
+
+    protected $tenantService;
+
+    protected $roleService;
+
+    protected $permissionService;
+
+    public function __construct(
+        UserService $userService,
+        TenantService $tenantService,
+        RoleService $roleService,
+        PermissionService $permissionService
+    ) {
+        $this->userService = $userService;
+        $this->tenantService = $tenantService;
+        $this->roleService = $roleService;
+        $this->permissionService = $permissionService;
+    }
+
     /**
      * Display a listing of the resource.
      */
-    public function index(): Response
+    public function index(Request $request): Response
     {
         return Inertia::render('users/index', [
-            'users' => User::paginate(10),
-            'tenants' => Tenant::paginate(10),
-            'roles' => Role::paginate(10),
-            'permissions' => Permission::paginate(10),
+            'users' => $this->userService->getPaginatedUsers($request),
+            'tenants' => $this->tenantService->getPaginatedTenants($request),
+            'roles' => $this->roleService->getPaginatedRoles($request),
+            'permissions' => $this->permissionService->getPaginatedPermissions($request),
         ]);
     }
 
