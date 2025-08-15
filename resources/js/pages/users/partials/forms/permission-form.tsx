@@ -38,9 +38,11 @@ export function PermissionForm({ permission, children }: { permission?: Permissi
             <Input id="name" value={data.name} onChange={(e) => setData('name', e.target.value)} />
             <InputError message={errors.name} />
           </div>
-          <Button type="submit" disabled={processing}>
-            {permission ? 'Update' : 'Create'}
-          </Button>
+          <div className="flex justify-end">
+            <Button type="submit" disabled={processing}>
+              {permission ? 'Update' : 'Create'}
+            </Button>
+          </div>
         </form>
       </DialogContent>
     </Dialog>

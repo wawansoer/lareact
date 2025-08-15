@@ -61,9 +61,11 @@ export function UserForm({ user, children }: { user?: User; children: React.Reac
             />
             <InputError message={errors.password_confirmation} />
           </div>
-          <Button type="submit" disabled={processing}>
-            {user ? 'Update' : 'Create'}
-          </Button>
+          <div className="flex justify-end">
+            <Button type="submit" disabled={processing}>
+              {user ? 'Update' : 'Create'}
+            </Button>
+          </div>
         </form>
       </DialogContent>
     </Dialog>

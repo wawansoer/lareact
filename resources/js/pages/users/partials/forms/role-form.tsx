@@ -38,9 +38,11 @@ export function RoleForm({ role, children }: { role?: Role; children: React.Reac
             <Input id="name" value={data.name} onChange={(e) => setData('name', e.target.value)} />
             <InputError message={errors.name} />
           </div>
-          <Button type="submit" disabled={processing}>
-            {role ? 'Update' : 'Create'}
-          </Button>
+          <div className="flex justify-end">
+            <Button type="submit" disabled={processing}>
+              {role ? 'Update' : 'Create'}
+            </Button>
+          </div>
         </form>
       </DialogContent>
     </Dialog>

@@ -38,9 +38,11 @@ export function TenantForm({ tenant, children }: { tenant?: Tenant; children: Re
             <Input id="name" value={data.name} onChange={(e) => setData('name', e.target.value)} />
             <InputError message={errors.name} />
           </div>
-          <Button type="submit" disabled={processing}>
-            {tenant ? 'Update' : 'Create'}
-          </Button>
+          <div className="flex justify-end">
+            <Button type="submit" disabled={processing}>
+              {tenant ? 'Update' : 'Create'}
+            </Button>
+          </div>
         </form>
       </DialogContent>
     </Dialog>
