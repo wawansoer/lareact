@@ -22,6 +22,13 @@ abstract class BaseService
     protected array $globalSearchColumns = ['name'];
 
     /**
+     * The relationships to be eager loaded.
+     *
+     * @var array<int, string>
+     */
+    protected array $relationships = [];
+
+    /**
      * Get the model instance.
      */
     abstract public function getModel(): Model;
@@ -38,11 +45,15 @@ abstract class BaseService
     {
         $query = $this->model->query();
 
+        if (! empty($this->relationships)) {
+            $query->with($this->relationships);
+        }
+
         $this->applySorting($query, $request);
         $this->applyColumnFilters($query, $request);
         $this->applyGlobalFilter($query, $request);
 
-        return $query->paginate($request->input('per_page', 10));
+        return $query->paginate($request->input('per_page', 10))->withQueryString();
     }
 
     /**
