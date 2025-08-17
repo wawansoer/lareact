@@ -19,21 +19,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
 | Google Authentication Routes
 |--------------------------------------------------------------------------
 */
-Route::get('/auth/google/redirect', [GoogleSignInController::class, 'redirect'])->name('google.redirect');
-Route::get('/auth/google/callback', [GoogleSignInController::class, 'callback'])->name('google.callback');
-
-/*
-|--------------------------------------------------------------------------
-| User & RBAC Management
-|--------------------------------------------------------------------------
-*/
-Route::middleware(['auth', 'verified'])->group(function () {
-    Route::resource('users', \App\Http\Controllers\UserController::class);
-    Route::resource('tenants', \App\Http\Controllers\TenantController::class);
-    Route::resource('roles', \App\Http\Controllers\RoleController::class);
-    Route::resource('permissions', \App\Http\Controllers\PermissionController::class);
-    Route::delete('permissions/bulk-delete', [\App\Http\Controllers\PermissionController::class, 'bulkDelete'])->name('permissions.bulk-delete');
-});
+Route::get('/auth/google/redirect', [GoogleSignInController::class, 'redirect'])
+    ->name('google.redirect');
+Route::get('/auth/google/callback', [GoogleSignInController::class, 'callback'])
+    ->name('google.callback');
 
 /*
 |--------------------------------------------------------------------------
@@ -42,3 +31,4 @@ Route::middleware(['auth', 'verified'])->group(function () {
 */
 require __DIR__.'/auth.php';
 require __DIR__.'/settings.php';
+require __DIR__.'/rbac.php';
