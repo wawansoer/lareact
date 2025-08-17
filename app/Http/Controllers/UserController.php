@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\User\BulkDestroyUserRequest;
 use App\Http\Requests\User\StoreUserRequest;
 use App\Http\Requests\User\UpdateUserRequest;
 use App\Models\User;
@@ -139,5 +140,15 @@ class UserController extends Controller
                 ->back()
                 ->with('error', 'Failed to delete user. Please try again.');
         }
+    }
+
+    /**
+     * Remove multiple specified resources from storage.
+     */
+    public function bulkDestroy(BulkDestroyUserRequest $request): RedirectResponse
+    {
+        $this->userService->bulkDeleteUsers($request->validated('ids'));
+
+        return redirect()->route('users.index', ['tab' => 'users'])->with('success', 'Selected users deleted successfully.');
     }
 }

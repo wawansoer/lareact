@@ -18,6 +18,13 @@ class UserService extends BaseService
     protected array $globalSearchColumns = ['name', 'email'];
 
     /**
+     * The relationships to be eager loaded.
+     *
+     * @var array<int, string>
+     */
+    protected array $relationships = ['tenants', 'roles'];
+
+    /**
      * Get the model instance.
      */
     public function getModel(): Model
@@ -30,7 +37,7 @@ class UserService extends BaseService
      */
     public function getPaginatedUsers(Request $request): LengthAwarePaginator
     {
-        return $this->getPaginatedData($request);
+        return $this->getPaginatedData($request, ['roles', 'tenants']);
     }
 
     /**
@@ -67,5 +74,15 @@ class UserService extends BaseService
     public function deleteUser(User $user): ?bool
     {
         return $user->delete();
+    }
+
+    /**
+     * Bulk delete users.
+     *
+     * @param  array<int, int>  $ids
+     */
+    public function bulkDeleteUsers(array $ids): int
+    {
+        return $this->model->whereIn('id', $ids)->delete();
     }
 }

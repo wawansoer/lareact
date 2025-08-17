@@ -2,13 +2,22 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\Tenant\BulkDestroyTenantRequest;
 use App\Http\Requests\Tenant\StoreTenantRequest;
 use App\Http\Requests\Tenant\UpdateTenantRequest;
 use App\Models\Tenant;
+use App\Services\TenantService;
 use Illuminate\Http\RedirectResponse;
 
 class TenantController extends Controller
 {
+    protected $tenantService;
+
+    public function __construct(TenantService $tenantService)
+    {
+        $this->tenantService = $tenantService;
+    }
+
     /**
      * Display a listing of the resource.
      */
@@ -32,7 +41,9 @@ class TenantController extends Controller
     {
         Tenant::create($request->validated());
 
-        return redirect()->route('users.index', ['tab' => 'tenants'])->with('success', 'Tenant created successfully.');
+        return redirect()
+            ->route('users.index', ['tab' => 'tenants'])
+            ->with('success', 'Tenant created successfully.');
     }
 
     /**
@@ -58,7 +69,9 @@ class TenantController extends Controller
     {
         $tenant->update($request->validated());
 
-        return redirect()->route('users.index', ['tab' => 'tenants'])->with('success', 'Tenant updated successfully.');
+        return redirect()
+            ->route('users.index', ['tab' => 'tenants'])
+            ->with('success', 'Tenant updated successfully.');
     }
 
     /**
@@ -66,8 +79,22 @@ class TenantController extends Controller
      */
     public function destroy(Tenant $tenant): RedirectResponse
     {
-        $tenant->delete();
+        $this->tenantService->deleteTenant($tenant);
 
-        return redirect()->route('users.index', ['tab' => 'tenants'])->with('success', 'Tenant deleted successfully.');
+        return redirect()
+            ->route('users.index', ['tab' => 'tenants'])
+            ->with('success', 'Tenant deleted successfully.');
+    }
+
+    /**
+     * Remove multiple specified resources from storage.
+     */
+    public function bulkDestroy(BulkDestroyTenantRequest $request): RedirectResponse
+    {
+        $this->tenantService->bulkDeleteTenants($request->validated('ids'));
+
+        return redirect()
+            ->route('users.index', ['tab' => 'tenants'])
+            ->with('success', 'Selected tenants deleted successfully.');
     }
 }

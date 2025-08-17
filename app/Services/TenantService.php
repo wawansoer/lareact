@@ -32,4 +32,24 @@ class TenantService extends BaseService
     {
         return $this->model->query()->select('id', 'name')->get();
     }
+
+    /**
+     * Bulk delete tenants.
+     *
+     * @param  array<int, string>  $ids
+     */
+    public function bulkDeleteTenants(array $ids): int
+    {
+        return $this->model->whereIn('id', $ids)->delete();
+    }
+
+    /**
+     * Delete a tenant.
+     *
+     * @throws \Exception
+     */
+    public function deleteTenant(Tenant $tenant): ?bool
+    {
+        return $tenant->delete();
+    }
 }

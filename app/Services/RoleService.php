@@ -10,6 +10,13 @@ use Illuminate\Http\Request;
 class RoleService extends BaseService
 {
     /**
+     * The relationships to be eager loaded.
+     *
+     * @var array<int, string>
+     */
+    protected array $relationships = ['tenant'];
+
+    /**
      * Get the model instance.
      */
     public function getModel(): Model
@@ -23,5 +30,25 @@ class RoleService extends BaseService
     public function getPaginatedRoles(Request $request): LengthAwarePaginator
     {
         return $this->getPaginatedData($request);
+    }
+
+    /**
+     * Bulk delete roles.
+     *
+     * @param  array<int, int>  $ids
+     */
+    public function bulkDeleteRoles(array $ids): int
+    {
+        return $this->model->whereIn('id', $ids)->delete();
+    }
+
+    /**
+     * Delete a role.
+     *
+     * @throws \Exception
+     */
+    public function deleteRole(Role $role): ?bool
+    {
+        return $role->delete();
     }
 }

@@ -2,13 +2,22 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\Role\BulkDestroyRoleRequest;
 use App\Http\Requests\Role\StoreRoleRequest;
 use App\Http\Requests\Role\UpdateRoleRequest;
 use App\Models\Role;
+use App\Services\RoleService;
 use Illuminate\Http\RedirectResponse;
 
 class RoleController extends Controller
 {
+    protected $roleService;
+
+    public function __construct(RoleService $roleService)
+    {
+        $this->roleService = $roleService;
+    }
+
     /**
      * Display a listing of the resource.
      */
@@ -66,8 +75,18 @@ class RoleController extends Controller
      */
     public function destroy(Role $role): RedirectResponse
     {
-        $role->delete();
+        $this->roleService->deleteRole($role);
 
         return redirect()->route('users.index', ['tab' => 'roles'])->with('success', 'Role deleted successfully.');
+    }
+
+    /**
+     * Remove multiple specified resources from storage.
+     */
+    public function bulkDestroy(BulkDestroyRoleRequest $request): RedirectResponse
+    {
+        $this->roleService->bulkDeleteRoles($request->validated('ids'));
+
+        return redirect()->route('users.index', ['tab' => 'roles'])->with('success', 'Selected roles deleted successfully.');
     }
 }

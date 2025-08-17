@@ -49,4 +49,14 @@ class PermissionService extends BaseService
     {
         return Permission::whereIn('id', $ids)->delete();
     }
+
+    /**
+     * Delete a permission.
+     *
+     * @throws \Exception
+     */
+    public function deletePermission(Permission $permission): ?bool
+    {
+        return $permission->delete();
+    }
 }
