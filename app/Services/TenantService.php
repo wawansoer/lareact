@@ -24,4 +24,12 @@ class TenantService extends BaseService
     {
         return $this->getPaginatedData($request);
     }
+
+    /**
+     * Get all tenants.
+     */
+    public function getAllTenants()
+    {
+        return $this->model->query()->select('id', 'name')->get();
+    }
 }
