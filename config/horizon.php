@@ -4,6 +4,8 @@ use Illuminate\Support\Str;
 
 return [
 
+    'enable' => env('HORIZON_ENABLE', true),
+
     /*
     |--------------------------------------------------------------------------
     | Horizon Domain

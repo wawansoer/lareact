@@ -2,6 +2,6 @@
 
 return [
     App\Providers\AppServiceProvider::class,
-    App\Providers\HorizonServiceProvider::class,
+    config('horizon.enable') ?? App\Providers\HorizonServiceProvider::class,
     App\Providers\AuthServiceProvider::class,
 ];
