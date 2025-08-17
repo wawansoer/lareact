@@ -10,6 +10,12 @@ class Role extends SpatieRole
 {
     use HasUlids;
 
+    protected $fillable = [
+        'name',
+        'guard_name',
+        'tenant_id',
+    ];
+
     public function tenant(): BelongsTo
     {
         return $this->belongsTo(Tenant::class);
