@@ -10,6 +10,20 @@ use Illuminate\Http\Request;
 class PermissionService extends BaseService
 {
     /**
+     * The columns to be searched in a global search.
+     *
+     * @var array<int, string>
+     */
+    protected array $globalSearchColumns = ['name', 'tenant.name'];
+
+    /**
+     * The relationships to be eager loaded.
+     *
+     * @var array<int, string>
+     */
+    protected array $relationships = ['tenant'];
+
+    /**
      * Get the model instance.
      */
     public function getModel(): Model
@@ -23,5 +37,16 @@ class PermissionService extends BaseService
     public function getPaginatedPermissions(Request $request): LengthAwarePaginator
     {
         return $this->getPaginatedData($request);
+    }
+
+    /**
+     * Bulk delete permissions by their IDs.
+     *
+     * @param  array<int, int>  $ids
+     * @return int The number of deleted permissions.
+     */
+    public function bulkDeletePermissions(array $ids): int
+    {
+        return Permission::whereIn('id', $ids)->delete();
     }
 }

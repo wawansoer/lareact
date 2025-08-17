@@ -5,10 +5,20 @@ namespace App\Http\Controllers;
 use App\Http\Requests\Permission\StorePermissionRequest;
 use App\Http\Requests\Permission\UpdatePermissionRequest;
 use App\Models\Permission;
+use App\Services\PermissionService;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 
 class PermissionController extends Controller
 {
+    protected $permissionService;
+
+    public function __construct(PermissionService $permissionService)
+    {
+        $this->permissionService = $permissionService;
+    }
+
     /**
      * Display a listing of the resource.
      */
@@ -69,5 +79,25 @@ class PermissionController extends Controller
         $permission->delete();
 
         return redirect()->route('users.index', ['tab' => 'permissions'])->with('success', 'Permission deleted successfully.');
+    }
+
+    /**
+     * Bulk delete the specified resources from storage.
+     */
+    public function bulkDelete(Request $request): JsonResponse
+    {
+        $ids = $request->input('ids', []);
+
+        if (empty($ids)) {
+            return response()->json(['success' => false, 'message' => 'No permissions selected for deletion.']);
+        }
+
+        try {
+            $deletedCount = $this->permissionService->bulkDeletePermissions($ids);
+
+            return response()->json(['success' => true, 'message' => $deletedCount.' permission(s) deleted successfully.']);
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'message' => 'Failed to delete permissions.']);
+        }
     }
 }
