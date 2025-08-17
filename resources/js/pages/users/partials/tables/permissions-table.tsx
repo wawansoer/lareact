@@ -179,6 +179,7 @@ export function PermissionsTable({ permissions }: PermissionsTableProps) {
     getPaginationRowModel: getPaginationRowModel(),
     getSortedRowModel: getSortedRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
+    getRowId: (row) => String(row.id),
     enableRowSelection: true,
     manualPagination: true,
     manualFiltering: true,
@@ -208,19 +209,22 @@ export function PermissionsTable({ permissions }: PermissionsTableProps) {
     if (selectedIds.length === 0) return;
 
     // Perform bulk delete
-    router.delete(route('permissions.bulk-delete'), {
-      data: { ids: selectedIds },
-      onSuccess: () => {
-        // Clear selection after successful deletion
-        table.resetRowSelection();
-        // Show success message
-        alert(`${selectedIds.length} permission(s) deleted successfully.`);
+    router.post(
+      route('permissions.bulk-delete'),
+      { ids: selectedIds },
+      {
+        onSuccess: () => {
+          // Clear selection after successful deletion
+          table.resetRowSelection();
+          // Show success message
+          alert(`${selectedIds.length} permission(s) deleted successfully.`);
+        },
+        onError: (error: Record<string, string>) => {
+          console.error('Error bulk deleting permissions:', error);
+          alert('Failed to delete selected permissions. Please try again.');
+        },
       },
-      onError: (error) => {
-        console.error('Error bulk deleting permissions:', error);
-        alert('Failed to delete selected permissions. Please try again.');
-      },
-    });
+    );
   };
 
   return (

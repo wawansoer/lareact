@@ -1,16 +1,27 @@
 import { DataTablePagination } from '@/components/data-table-pagination';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
 import { DropdownMenu, DropdownMenuCheckboxItem, DropdownMenuContent, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Input } from '@/components/ui/input';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Paginated, Tenant } from '@/types';
 import { router, usePage } from '@inertiajs/react';
 import {
   ColumnDef,
   ColumnFiltersState,
-  ColumnPinningState,
   flexRender,
   getCoreRowModel,
   getFilteredRowModel,
@@ -21,74 +32,124 @@ import {
   useReactTable,
   VisibilityState,
 } from '@tanstack/react-table';
+import { ArrowDownAZ, ArrowUpZA, Eye, MoreVertical, Pencil, Trash2, X } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 import { TenantForm } from '../forms/tenant-form';
 
-export function TenantsTable({ tenants }: { tenants: Paginated<Tenant> }) {
+const tenantColumns: ColumnDef<Tenant>[] = [
+  {
+    id: 'select',
+    header: ({ table }) => (
+      <Checkbox
+        checked={table.getIsAllPageRowsSelected()}
+        onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
+        aria-label="Select all"
+      />
+    ),
+    cell: ({ row }) => <Checkbox checked={row.getIsSelected()} onCheckedChange={(value) => row.toggleSelected(!!value)} aria-label="Select row" />,
+    enableSorting: false,
+    enableHiding: false,
+  },
+  {
+    accessorKey: 'name',
+    header: ({ column }) => {
+      return (
+        <div className="my-2 flex cursor-pointer items-center justify-between" onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}>
+          <span>Name</span>
+          {{
+            asc: <ArrowUpZA className="h-4 w-4" />,
+            desc: <ArrowDownAZ className="h-4 w-4" />,
+          }[column.getIsSorted() as string] ?? null}
+        </div>
+      );
+    },
+    cell: ({ row }) => <div className="capitalize">{row.getValue('name')}</div>,
+    enableSorting: true,
+    enableColumnFilter: true,
+  },
+  {
+    id: 'actions',
+    header: 'Actions',
+    cell: ({ row }) => {
+      const tenant = row.original;
+
+      const handleDelete = () => {
+        router.delete(route('tenants.destroy', tenant.id), {
+          onError: (error) => {
+            console.error('Error deleting tenant:', error);
+            alert('Failed to delete tenant. Please try again.');
+          },
+        });
+      };
+
+      return (
+        <Popover>
+          <PopoverTrigger asChild>
+            <Button variant="ghost" size="sm">
+              <MoreVertical className="h-4 w-4" />
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="w-40 p-2">
+            <div className="flex flex-col gap-2">
+              <TenantForm tenant={tenant}>
+                <Button variant="ghost" className="w-full justify-start">
+                  <Pencil className="mr-2 h-4 w-4" />
+                  Edit
+                </Button>
+              </TenantForm>
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button variant="ghost" className="w-full justify-start text-red-600">
+                    <Trash2 className="mr-2 h-4 w-4" />
+                    Delete
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Delete Tenant</AlertDialogTitle>
+                    <AlertDialogDescription>Are you sure you want to delete this tenant? This action cannot be undone.</AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                    <AlertDialogAction variant="destructive" onClick={handleDelete}>
+                      Delete
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+            </div>
+          </PopoverContent>
+        </Popover>
+      );
+    },
+    enableHiding: false,
+  },
+];
+
+interface TenantsTableProps {
+  tenants: Paginated<Tenant>;
+}
+
+export function TenantsTable({ tenants }: TenantsTableProps) {
   const { url } = usePage();
   const data = useMemo(() => tenants.data, [tenants]);
   const totalRows = useMemo(() => tenants.total, [tenants]);
-
-  const columns = useMemo<ColumnDef<Tenant>[]>(
-    () => [
-      {
-        id: 'select',
-        header: ({ table }) => (
-          <Checkbox
-            checked={table.getIsAllPageRowsSelected()}
-            onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
-            aria-label="Select all"
-          />
-        ),
-        cell: ({ row }) => (
-          <Checkbox checked={row.getIsSelected()} onCheckedChange={(value) => row.toggleSelected(!!value)} aria-label="Select row" />
-        ),
-        enableSorting: false,
-        enableHiding: false,
-      },
-      {
-        accessorKey: 'name',
-        header: 'Name',
-        cell: ({ row }) => <div className="capitalize">{row.getValue('name')}</div>,
-        enableSorting: true,
-        enableColumnFiltering: true,
-      },
-      {
-        id: 'actions',
-        cell: ({ row }) => {
-          const tenant = row.original;
-          return (
-            <div className="flex gap-2">
-              <TenantForm tenant={tenant}>
-                <Button variant="outline">Edit</Button>
-              </TenantForm>
-              <Button variant="destructive" onClick={() => router.delete(route('tenants.destroy', tenant.id))}>
-                Delete
-              </Button>
-            </div>
-          );
-        },
-        enableHiding: false,
-      },
-    ],
-    [],
-  );
 
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [globalFilter, setGlobalFilter] = useState('');
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
-  const [rowSelection, setRowSelection] = useState({});
-  const [columnOrder, setColumnOrder] = useState<string[]>([]);
-  const [columnPinning, setColumnPinning] = useState<ColumnPinningState>({});
+  const [rowSelection, setRowSelection] = useState<Record<string, boolean>>({});
   const [pagination, setPagination] = useState<PaginationState>({
     pageIndex: tenants.current_page - 1,
     pageSize: tenants.per_page,
   });
 
+  const [isLoading, setIsLoading] = useState(false);
+
   const table = useReactTable({
     data,
-    columns,
+    columns: tenantColumns,
     pageCount: Math.ceil(totalRows / pagination.pageSize),
     state: {
       sorting,
@@ -96,8 +157,6 @@ export function TenantsTable({ tenants }: { tenants: Paginated<Tenant> }) {
       globalFilter,
       columnVisibility,
       rowSelection,
-      columnOrder,
-      columnPinning,
       pagination,
     },
     onSortingChange: setSorting,
@@ -105,13 +164,12 @@ export function TenantsTable({ tenants }: { tenants: Paginated<Tenant> }) {
     onGlobalFilterChange: setGlobalFilter,
     onColumnVisibilityChange: setColumnVisibility,
     onRowSelectionChange: setRowSelection,
-    onColumnOrderChange: setColumnOrder,
-    onColumnPinningChange: setColumnPinning,
     onPaginationChange: setPagination,
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
     getSortedRowModel: getSortedRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
+    getRowId: (row) => String(row.id),
     enableRowSelection: true,
     manualPagination: true,
     manualFiltering: true,
@@ -119,6 +177,7 @@ export function TenantsTable({ tenants }: { tenants: Paginated<Tenant> }) {
   });
 
   useEffect(() => {
+    setIsLoading(true);
     const params = {
       page: pagination.pageIndex + 1,
       per_page: pagination.pageSize,
@@ -130,31 +189,52 @@ export function TenantsTable({ tenants }: { tenants: Paginated<Tenant> }) {
     router.get(url, params, {
       preserveState: true,
       replace: true,
+      onFinish: () => setIsLoading(false),
     });
   }, [pagination, sorting, columnFilters, globalFilter, url]);
+
+  // Handle bulk delete operation
+  const handleBulkDelete = () => {
+    const selectedTenantIds = table.getSelectedRowModel().flatRows.map((row) => row.original.id);
+    if (selectedTenantIds.length === 0) return;
+
+    // Perform bulk delete
+    router.post(
+      route('tenants.bulk-delete'),
+      { ids: selectedTenantIds },
+      {
+        onSuccess: () => {
+          // Clear selection after successful deletion
+          table.resetRowSelection();
+          // Show success message
+          alert(`${selectedTenantIds.length} tenant(s) deleted successfully.`);
+        },
+        onError: (error: Record<string, string>) => {
+          console.error('Error bulk deleting tenants:', error);
+          alert('Failed to delete selected tenants. Please try again.');
+        },
+      },
+    );
+  };
 
   return (
     <Card>
       <CardHeader>
-        <div className="flex justify-between">
-          <CardTitle>Tenants</CardTitle>
-          <TenantForm>
-            <Button>Create Tenant</Button>
-          </TenantForm>
-        </div>
+        <CardTitle>Tenants</CardTitle>
+        <CardDescription>Manage Tenants</CardDescription>
       </CardHeader>
       <CardContent>
-        <div className="flex items-center py-4">
+        <div className="flex items-center gap-2 py-2">
           <Input
-            placeholder="Filter all columns..."
+            placeholder="Filter by tenant name..."
             value={globalFilter ?? ''}
             onChange={(event) => setGlobalFilter(event.target.value)}
             className="max-w-sm"
           />
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="outline" className="ml-auto">
-                Columns
+              <Button variant="outline" size="icon" className="ml-auto">
+                <Eye />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
@@ -176,6 +256,45 @@ export function TenantsTable({ tenants }: { tenants: Paginated<Tenant> }) {
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
+        <div className="flex flex-wrap items-center justify-between gap-2 py-2">
+          <div className="flex items-center gap-4">
+            {Object.keys(rowSelection).length > 0 && (
+              <div className="flex items-center gap-2">
+                <span className="text-sm text-muted-foreground">{Object.keys(rowSelection).length} selected</span>
+                <Button variant="outline" size="sm" onClick={() => table.resetRowSelection()}>
+                  <X className="mr-1 h-4 w-4" />
+                  Clear
+                </Button>
+              </div>
+            )}
+          </div>
+          <div className="flex items-center gap-2">
+            {Object.keys(rowSelection).length > 0 && (
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button variant="destructive" size="sm">
+                    <Trash2 className="mr-1 h-4 w-4" />
+                    Delete Selected ({Object.keys(rowSelection).length})
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Delete Selected Tenants</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      Are you sure you want to delete {Object.keys(rowSelection).length} tenant(s)? This action cannot be undone.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                    <AlertDialogAction variant="destructive" onClick={handleBulkDelete}>
+                      Delete {Object.keys(rowSelection).length} Tenant(s)
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+            )}
+          </div>
+        </div>
         <div className="rounded-md border">
           <Table>
             <TableHeader>
@@ -192,7 +311,13 @@ export function TenantsTable({ tenants }: { tenants: Paginated<Tenant> }) {
               ))}
             </TableHeader>
             <TableBody>
-              {table.getRowModel().rows?.length ? (
+              {isLoading ? (
+                <TableRow>
+                  <TableCell colSpan={tenantColumns.length} className="h-24 text-center">
+                    Loading...
+                  </TableCell>
+                </TableRow>
+              ) : table.getRowModel().rows?.length ? (
                 table.getRowModel().rows.map((row) => (
                   <TableRow key={row.id} data-state={row.getIsSelected() && 'selected'}>
                     {row.getVisibleCells().map((cell) => (
@@ -202,7 +327,7 @@ export function TenantsTable({ tenants }: { tenants: Paginated<Tenant> }) {
                 ))
               ) : (
                 <TableRow>
-                  <TableCell colSpan={columns.length} className="h-24 text-center">
+                  <TableCell colSpan={tenantColumns.length} className="h-24 text-center">
                     No results.
                   </TableCell>
                 </TableRow>

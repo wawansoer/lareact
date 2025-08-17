@@ -1,16 +1,28 @@
 import { DataTablePagination } from '@/components/data-table-pagination';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
 import { DropdownMenu, DropdownMenuCheckboxItem, DropdownMenuContent, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Input } from '@/components/ui/input';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Paginated, User } from '@/types';
 import { router, usePage } from '@inertiajs/react';
 import {
   ColumnDef,
   ColumnFiltersState,
-  ColumnPinningState,
   flexRender,
   getCoreRowModel,
   getFilteredRowModel,
@@ -21,81 +33,183 @@ import {
   useReactTable,
   VisibilityState,
 } from '@tanstack/react-table';
+import { ArrowDownAZ, ArrowUpZA, Eye, MoreVertical, Pencil, Trash2, X } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 import { UserForm } from '../forms/user-form';
 
-export function UsersTable({ users }: { users: Paginated<User> }) {
+const userColumns: ColumnDef<User>[] = [
+  {
+    id: 'select',
+    header: ({ table }) => (
+      <Checkbox
+        checked={table.getIsAllPageRowsSelected()}
+        onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
+        aria-label="Select all"
+      />
+    ),
+    cell: ({ row }) => <Checkbox checked={row.getIsSelected()} onCheckedChange={(value) => row.toggleSelected(!!value)} aria-label="Select row" />,
+    enableSorting: false,
+    enableHiding: false,
+  },
+  {
+    accessorKey: 'name',
+    header: ({ column }) => {
+      return (
+        <div className="my-2 flex cursor-pointer items-center justify-between" onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}>
+          <span>Name</span>
+          {{
+            asc: <ArrowUpZA className="h-4 w-4" />,
+            desc: <ArrowDownAZ className="h-4 w-4" />,
+          }[column.getIsSorted() as string] ?? null}
+        </div>
+      );
+    },
+    cell: ({ row }) => <div className="flex flex-wrap capitalize">{row.getValue('name')}</div>,
+    enableSorting: true,
+    enableColumnFilter: true,
+  },
+  {
+    accessorKey: 'email',
+    header: ({ column }) => {
+      return (
+        <div className="my-2 flex cursor-pointer items-center justify-between" onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}>
+          <span>Email</span>
+          {{
+            asc: <ArrowUpZA className="h-4 w-4" />,
+            desc: <ArrowDownAZ className="h-4 w-4" />,
+          }[column.getIsSorted() as string] ?? null}
+        </div>
+      );
+    },
+    cell: ({ row }) => <div className="flex flex-wrap lowercase">{row.getValue('email')}</div>,
+    enableSorting: true,
+    enableColumnFilter: true,
+  },
+  {
+    id: 'roles',
+    header: 'Roles',
+    cell: ({ row }) => {
+      const { roles } = row.original;
+      return (
+        <div className="flex flex-wrap gap-1">
+          {roles && roles.length > 0 ? (
+            roles.map((role) => (
+              <Badge key={role.id} variant="outline">
+                {role.name}
+              </Badge>
+            ))
+          ) : (
+            <span className="text-muted-foreground">No roles</span>
+          )}
+        </div>
+      );
+    },
+    enableSorting: true,
+    enableColumnFilter: true,
+  },
+  {
+    id: 'tenants',
+    header: 'Tenants',
+    cell: ({ row }) => {
+      const { tenants } = row.original;
+      return (
+        <div className="flex flex-wrap gap-1">
+          {tenants && tenants.length > 0 ? (
+            tenants.map((tenant) => (
+              <Badge key={tenant.id} variant="secondary">
+                {tenant.name}
+              </Badge>
+            ))
+          ) : (
+            <span className="text-muted-foreground">No tenants</span>
+          )}
+        </div>
+      );
+    },
+  },
+  {
+    id: 'actions',
+    header: 'Actions',
+    cell: ({ row }) => {
+      const user = row.original;
+
+      const handleDelete = () => {
+        router.delete(route('users.destroy', user.id), {
+          onError: (error) => {
+            console.error('Error deleting user:', error);
+            alert('Failed to delete user. Please try again.');
+          },
+        });
+      };
+
+      return (
+        <Popover>
+          <PopoverTrigger asChild>
+            <Button variant="ghost" size="sm">
+              <MoreVertical className="h-4 w-4" />
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="w-40 p-2">
+            <div className="flex flex-col gap-2">
+              <UserForm user={user}>
+                <Button variant="ghost" className="w-full justify-start">
+                  <Pencil className="mr-2 h-4 w-4" />
+                  Edit
+                </Button>
+              </UserForm>
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button variant="ghost" className="w-full justify-start text-red-600">
+                    <Trash2 className="mr-2 h-4 w-4" />
+                    Delete
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Delete User</AlertDialogTitle>
+                    <AlertDialogDescription>Are you sure you want to delete this user? This action cannot be undone.</AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                    <AlertDialogAction variant="destructive" onClick={handleDelete}>
+                      Delete
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+            </div>
+          </PopoverContent>
+        </Popover>
+      );
+    },
+    enableHiding: false,
+  },
+];
+
+interface UsersTableProps {
+  users: Paginated<User>;
+}
+
+export function UsersTable({ users }: UsersTableProps) {
   const { url } = usePage();
   const data = useMemo(() => users.data, [users]);
   const totalRows = useMemo(() => users.total, [users]);
-
-  const columns = useMemo<ColumnDef<User>[]>(
-    () => [
-      {
-        id: 'select',
-        header: ({ table }) => (
-          <Checkbox
-            checked={table.getIsAllPageRowsSelected()}
-            onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
-            aria-label="Select all"
-          />
-        ),
-        cell: ({ row }) => (
-          <Checkbox checked={row.getIsSelected()} onCheckedChange={(value) => row.toggleSelected(!!value)} aria-label="Select row" />
-        ),
-        enableSorting: false,
-        enableHiding: false,
-      },
-      {
-        accessorKey: 'name',
-        header: 'Name',
-        cell: ({ row }) => <div className="capitalize">{row.getValue('name')}</div>,
-        enableSorting: true,
-        enableColumnFiltering: true,
-      },
-      {
-        accessorKey: 'email',
-        header: 'Email',
-        cell: ({ row }) => <div className="lowercase">{row.getValue('email')}</div>,
-        enableSorting: true,
-        enableColumnFiltering: true,
-      },
-      {
-        id: 'actions',
-        cell: ({ row }) => {
-          const user = row.original;
-          return (
-            <div className="flex gap-2">
-              <UserForm user={user}>
-                <Button variant="outline">Edit</Button>
-              </UserForm>
-              <Button variant="destructive" onClick={() => router.delete(route('users.destroy', user.id))}>
-                Delete
-              </Button>
-            </div>
-          );
-        },
-        enableHiding: false,
-      },
-    ],
-    [],
-  );
 
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [globalFilter, setGlobalFilter] = useState('');
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
-  const [rowSelection, setRowSelection] = useState({});
-  const [columnOrder, setColumnOrder] = useState<string[]>([]);
-  const [columnPinning, setColumnPinning] = useState<ColumnPinningState>({});
+  const [rowSelection, setRowSelection] = useState<Record<string, boolean>>({});
   const [pagination, setPagination] = useState<PaginationState>({
     pageIndex: users.current_page - 1,
     pageSize: users.per_page,
   });
 
+  const [isLoading, setIsLoading] = useState(false);
+
   const table = useReactTable({
     data,
-    columns,
+    columns: userColumns,
     pageCount: Math.ceil(totalRows / pagination.pageSize),
     state: {
       sorting,
@@ -103,8 +217,6 @@ export function UsersTable({ users }: { users: Paginated<User> }) {
       globalFilter,
       columnVisibility,
       rowSelection,
-      columnOrder,
-      columnPinning,
       pagination,
     },
     onSortingChange: setSorting,
@@ -112,13 +224,12 @@ export function UsersTable({ users }: { users: Paginated<User> }) {
     onGlobalFilterChange: setGlobalFilter,
     onColumnVisibilityChange: setColumnVisibility,
     onRowSelectionChange: setRowSelection,
-    onColumnOrderChange: setColumnOrder,
-    onColumnPinningChange: setColumnPinning,
     onPaginationChange: setPagination,
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
     getSortedRowModel: getSortedRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
+    getRowId: (row) => String(row.id),
     enableRowSelection: true,
     manualPagination: true,
     manualFiltering: true,
@@ -126,6 +237,7 @@ export function UsersTable({ users }: { users: Paginated<User> }) {
   });
 
   useEffect(() => {
+    setIsLoading(true);
     const params = {
       page: pagination.pageIndex + 1,
       per_page: pagination.pageSize,
@@ -137,31 +249,52 @@ export function UsersTable({ users }: { users: Paginated<User> }) {
     router.get(url, params, {
       preserveState: true,
       replace: true,
+      onFinish: () => setIsLoading(false),
     });
   }, [pagination, sorting, columnFilters, globalFilter, url]);
+
+  // Handle bulk delete operation
+  const handleBulkDelete = () => {
+    const selectedUserIds = table.getSelectedRowModel().flatRows.map((row) => row.original.id);
+    if (selectedUserIds.length === 0) return;
+
+    // Perform bulk delete
+    router.post(
+      route('users.bulk-delete'),
+      { ids: selectedUserIds },
+      {
+        onSuccess: () => {
+          // Clear selection after successful deletion
+          table.resetRowSelection();
+          // Show success message
+          alert(`${selectedUserIds.length} user(s) deleted successfully.`);
+        },
+        onError: (error: Record<string, string>) => {
+          console.error('Error bulk deleting users:', error);
+          alert('Failed to delete selected users. Please try again.');
+        },
+      },
+    );
+  };
 
   return (
     <Card>
       <CardHeader>
-        <div className="flex justify-between">
-          <CardTitle>Users</CardTitle>
-          <UserForm>
-            <Button>Create User</Button>
-          </UserForm>
-        </div>
+        <CardTitle>Users</CardTitle>
+        <CardDescription>Manage User</CardDescription>
       </CardHeader>
       <CardContent>
-        <div className="flex items-center py-4">
+        <div className="flex items-center gap-2 py-2">
           <Input
-            placeholder="Filter all columns..."
+            placeholder="Filter by user name or email..."
             value={globalFilter ?? ''}
             onChange={(event) => setGlobalFilter(event.target.value)}
             className="max-w-sm"
           />
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="outline" className="ml-auto">
-                Columns
+              <Button variant="outline" size="icon" className="ml-auto">
+                <Eye />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
@@ -183,6 +316,45 @@ export function UsersTable({ users }: { users: Paginated<User> }) {
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
+        <div className="flex flex-wrap items-center justify-between gap-2 py-2">
+          <div className="flex items-center gap-4">
+            {Object.keys(rowSelection).length > 0 && (
+              <div className="flex items-center gap-2">
+                <span className="text-sm text-muted-foreground">{Object.keys(rowSelection).length} selected</span>
+                <Button variant="outline" size="sm" onClick={() => table.resetRowSelection()}>
+                  <X className="mr-1 h-4 w-4" />
+                  Clear
+                </Button>
+              </div>
+            )}
+          </div>
+          <div className="flex items-center gap-2">
+            {Object.keys(rowSelection).length > 0 && (
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button variant="destructive" size="sm">
+                    <Trash2 className="mr-1 h-4 w-4" />
+                    Delete Selected ({Object.keys(rowSelection).length})
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Delete Selected Users</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      Are you sure you want to delete {Object.keys(rowSelection).length} user(s)? This action cannot be undone.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                    <AlertDialogAction variant="destructive" onClick={handleBulkDelete}>
+                      Delete {Object.keys(rowSelection).length} User(s)
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+            )}
+          </div>
+        </div>
         <div className="rounded-md border">
           <Table>
             <TableHeader>
@@ -199,7 +371,13 @@ export function UsersTable({ users }: { users: Paginated<User> }) {
               ))}
             </TableHeader>
             <TableBody>
-              {table.getRowModel().rows?.length ? (
+              {isLoading ? (
+                <TableRow>
+                  <TableCell colSpan={userColumns.length} className="h-24 text-center">
+                    Loading...
+                  </TableCell>
+                </TableRow>
+              ) : table.getRowModel().rows?.length ? (
                 table.getRowModel().rows.map((row) => (
                   <TableRow key={row.id} data-state={row.getIsSelected() && 'selected'}>
                     {row.getVisibleCells().map((cell) => (
@@ -209,7 +387,7 @@ export function UsersTable({ users }: { users: Paginated<User> }) {
                 ))
               ) : (
                 <TableRow>
-                  <TableCell colSpan={columns.length} className="h-24 text-center">
+                  <TableCell colSpan={userColumns.length} className="h-24 text-center">
                     No results.
                   </TableCell>
                 </TableRow>
