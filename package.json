@@ -9,13 +9,13 @@
     "format:check": "prettier --check resources/",
     "lint": "eslint . --fix",
     "types": "tsc --noEmit",
-    "test": "vitest run && php artisan test",
+    "test": "vitest run && ./vendor/bin/pest",
     "prepare": "husky"
   },
   "lint-staged": {
     "*.php": [
       "./vendor/bin/pint",
-      "php artisan test"
+      "./vendor/bin/pest"
     ],
     "resources/js/**/*.{js,jsx,ts,tsx}": [
       "prettier --write",
