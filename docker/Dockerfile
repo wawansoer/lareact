@@ -78,7 +78,7 @@ RUN composer install \
 #          Stage 3 - Build Front End assets               #
 #==========================================================
 
-FROM oven/bun:canary-alpine AS node
+FROM oven/bun:alpine AS node
 
 ENV APP_ENV=${APP_ENV:-production} \
     NODE_ENV=${APP_ENV:-production}
