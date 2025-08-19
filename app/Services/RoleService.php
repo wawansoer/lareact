@@ -10,6 +10,13 @@ use Illuminate\Http\Request;
 class RoleService extends BaseService
 {
     /**
+     * The columns to be searched in a global search.
+     *
+     * @var array<int, string>
+     */
+    protected array $globalSearchColumns = ['name'];
+
+    /**
      * The relationships to be eager loaded.
      *
      * @var array<int, string>

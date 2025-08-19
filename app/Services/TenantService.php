@@ -10,6 +10,13 @@ use Illuminate\Http\Request;
 class TenantService extends BaseService
 {
     /**
+     * The columns to be searched in a global search.
+     *
+     * @var array<int, string>
+     */
+    protected array $globalSearchColumns = ['name'];
+
+    /**
      * Get the model instance.
      */
     public function getModel(): Model

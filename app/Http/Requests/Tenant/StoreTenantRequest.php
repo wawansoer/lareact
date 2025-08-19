@@ -23,6 +23,7 @@ class StoreTenantRequest extends FormRequest
     {
         return [
             'name' => 'required|string|max:255|unique:tenants',
+            'description' => 'nullable|string',
         ];
     }
 }

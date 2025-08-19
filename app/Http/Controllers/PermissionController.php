@@ -41,7 +41,9 @@ class PermissionController extends Controller
     {
         Permission::create($request->validated());
 
-        return redirect()->route('users.index', ['tab' => 'permissions'])->with('success', 'Permission created successfully.');
+        return redirect()
+            ->route('users.index', ['tab' => 'permissions'])
+            ->with('success', 'Permission created successfully.');
     }
 
     /**
@@ -67,7 +69,9 @@ class PermissionController extends Controller
     {
         $permission->update($request->validated());
 
-        return redirect()->route('users.index', ['tab' => 'permissions'])->with('success', 'Permission updated successfully.');
+        return redirect()
+            ->route('users.index', ['tab' => 'permissions'])
+            ->with('success', 'Permission updated successfully.');
     }
 
     /**
@@ -77,7 +81,9 @@ class PermissionController extends Controller
     {
         $this->permissionService->deletePermission($permission);
 
-        return redirect()->route('users.index', ['tab' => 'permissions'])->with('success', 'Permission deleted successfully.');
+        return redirect()
+            ->route('users.index', ['tab' => 'permissions'])
+            ->with('success', 'Permission deleted successfully.');
     }
 
     /**
@@ -87,6 +93,8 @@ class PermissionController extends Controller
     {
         $this->permissionService->bulkDeletePermissions($request->validated('ids'));
 
-        return redirect()->route('users.index', ['tab' => 'permissions'])->with('success', 'Selected permissions deleted successfully.');
+        return redirect()
+            ->route('users.index', ['tab' => 'permissions'])
+            ->with('success', 'Selected permissions deleted successfully.');
     }
 }

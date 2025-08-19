@@ -14,7 +14,7 @@ class PermissionService extends BaseService
      *
      * @var array<int, string>
      */
-    protected array $globalSearchColumns = ['name', 'tenant.name'];
+    protected array $globalSearchColumns = ['name'];
 
     /**
      * The relationships to be eager loaded.

@@ -8,6 +8,9 @@ use App\Http\Requests\Tenant\UpdateTenantRequest;
 use App\Models\Tenant;
 use App\Services\TenantService;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
+use Inertia\Inertia;
+use Inertia\Response;
 
 class TenantController extends Controller
 {
@@ -21,9 +24,13 @@ class TenantController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request): Response
     {
-        //
+        $props = [
+            'tenants' => $this->tenantService->getPaginatedTenants($request),
+        ];
+
+        return Inertia::render('tenants/index', $props);
     }
 
     /**
@@ -42,7 +49,7 @@ class TenantController extends Controller
         Tenant::create($request->validated());
 
         return redirect()
-            ->route('users.index', ['tab' => 'tenants'])
+            ->route('tenants.index')
             ->with('success', 'Tenant created successfully.');
     }
 
@@ -70,7 +77,7 @@ class TenantController extends Controller
         $tenant->update($request->validated());
 
         return redirect()
-            ->route('users.index', ['tab' => 'tenants'])
+            ->route('tenants.index')
             ->with('success', 'Tenant updated successfully.');
     }
 
@@ -82,7 +89,7 @@ class TenantController extends Controller
         $this->tenantService->deleteTenant($tenant);
 
         return redirect()
-            ->route('users.index', ['tab' => 'tenants'])
+            ->route('tenants.index')
             ->with('success', 'Tenant deleted successfully.');
     }
 
@@ -94,7 +101,7 @@ class TenantController extends Controller
         $this->tenantService->bulkDeleteTenants($request->validated('ids'));
 
         return redirect()
-            ->route('users.index', ['tab' => 'tenants'])
+            ->route('tenants.index')
             ->with('success', 'Selected tenants deleted successfully.');
     }
 }

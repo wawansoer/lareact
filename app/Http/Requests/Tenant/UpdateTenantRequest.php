@@ -25,6 +25,7 @@ class UpdateTenantRequest extends FormRequest
     {
         return [
             'name' => ['required', 'string', 'max:255', Rule::unique('tenants')->ignore(Route::current()->parameter('tenant'))],
+            'description' => 'nullable|string',
         ];
     }
 }

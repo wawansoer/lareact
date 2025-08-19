@@ -149,6 +149,8 @@ class UserController extends Controller
     {
         $this->userService->bulkDeleteUsers($request->validated('ids'));
 
-        return redirect()->route('users.index', ['tab' => 'users'])->with('success', 'Selected users deleted successfully.');
+        return redirect()
+            ->route('users.index', ['tab' => 'users'])
+            ->with('success', 'Selected users deleted successfully.');
     }
 }
