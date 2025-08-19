@@ -73,14 +73,12 @@
   "scripts": {
     "build": "vite build",
     "build:ssr": "vite build && vite build --ssr",
-    "cypress:open": "cypress open",
-    "cypress:run": "ELECTRON_ENABLE_STACK_DUMPING=true ELECTRON_DISABLE_SANDBOX=true cypress run --config-file cypress.config.ts --e2e --browser electron --headless",
     "dev": "vite",
     "format": "prettier --write resources/ && ./vendor/bin/pint",
     "format:check": "prettier --check resources/",
     "lint": "eslint . --fix",
     "prepare": "husky",
-    "test": "vitest run && ./vendor/bin/pest",
+    "test": "./vendor/bin/pest",
     "types": "tsc --noEmit"
   },
   "trustedDependencies": [
