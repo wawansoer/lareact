@@ -88,7 +88,7 @@ WORKDIR /app
 # Copy only files needed for bun install
 COPY --link package.json bun.lock* ./
 
-RUN bun install --frozen-lockfile
+RUN bun install
 
 # Copy source files and vendor directory
 COPY --link . .
