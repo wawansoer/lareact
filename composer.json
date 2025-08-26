@@ -49,7 +49,6 @@
     },
     "require-dev": {
         "fakerphp/faker": "^1.23",
-        "laravel/dusk": "^8.0",
         "laravel/pail": "^1.2.2",
         "laravel/pint": "^1.18",
         "laravel/sail": "^1.41",

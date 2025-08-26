@@ -12,25 +12,23 @@ services:
       APP_ENV: production
       APP_KEY: ${APP_KEY}
       APP_DEBUG: "false"
-      APP_URL: ${APP_URL:-http://localhost}
+      APP_URL: ${APP_URL}
       DB_CONNECTION: pgsql
       DB_HOST: db
       DB_PORT: 5432
-      DB_DATABASE: ${DB_DATABASE:-laravel}
-      DB_USERNAME: ${DB_USERNAME:-laravel_user}
-      DB_PASSWORD: ${DB_PASSWORD:-password}
+      DB_DATABASE: ${DB_DATABASE}
+      DB_USERNAME: ${DB_USERNAME}
+      DB_PASSWORD: ${DB_PASSWORD}
       CACHE_DRIVER: memcached
       MEMCACHED_HOST: cache
       MEMCACHED_PORT: 11211
       QUEUE_CONNECTION: redis
       REDIS_HOST: redis
-      SWOOLE_WORKER_NUM: ${SWOOLE_WORKER_NUM:-2}
-      SWOOLE_TASK_WORKER_NUM: ${SWOOLE_TASK_WORKER_NUM:-4}
-
+      SWOOLE_WORKER_NUM: ${SWOOLE_WORKER_NUM:-1}
+      SWOOLE_TASK_WORKER_NUM: ${SWOOLE_TASK_WORKER_NUM:-2}
     volumes:
-      - "../app/app_storage:/app/storage" 
+      - "../app/app_storage:/app/storage"
       - "../app/app_bootstrap_cache:/app/bootstrap/cache"
-
     depends_on:
       - db
       - cache
@@ -49,7 +47,6 @@ services:
       - "5432"
     networks:
       - lareact_network
-
   cache:
     image: memcached:alpine
     restart: unless-stopped
@@ -57,7 +54,6 @@ services:
       - "11211"
     networks:
       - lareact_network
-
   redis:
     image: redis:alpine
     restart: unless-stopped
@@ -65,12 +61,10 @@ services:
       - "6379"
     networks:
       - lareact_network
-
 volumes:
   pgdata:
   app_storage:
   app_bootstrap_cache:
-
 networks:
   lareact_network:
     driver: bridge

@@ -93,8 +93,7 @@ RUN bun install
 # Copy source files and vendor directory
 COPY --link . .
 COPY --link --from=vendor /app/vendor vendor
-
-RUN bun run build
+RUN bun run build:ssr
 
 #==========================================================
 #         Stage 4 - Final application image               #
@@ -106,7 +105,8 @@ ARG APP_ENV
 
 ENV APP_ENV=${APP_ENV:-production} \
     NODE_ENV=${APP_ENV:-production} \
-    WORKDIR=${WORKDIR:-/var/www/html}
+    WORKDIR=${WORKDIR:-/var/www/html} \
+    BUN_RUNTIME_TRANSPILER_CACHE_PATH=0
 
 USER root
 
@@ -120,39 +120,43 @@ COPY --chown=${USER}:${USER} . .
 
 # Copy dependencies from previous stages
 COPY --link --chown=${WWWUSER}:${WWWGROUP} --from=vendor /app/vendor ./vendor
+
+# Copy Front End Assets & Runtime For SSR
 COPY --link --chown=${WWWUSER}:${WWWGROUP} --from=node /app/public/build ./public/build
+COPY --link --chown=${WWWUSER}:${WWWGROUP} --from=node /app/bootstrap/ssr /app/bootstrap/ssr
+COPY --link --from=node /usr/local/bin/bun /usr/local/bin/bun
+RUN chmod +x /usr/local/bin/bun
 
 # Remove unnecessary files
 RUN rm -rf \
-    .git \
-    .env.example \
-    .gitattributes \
-    .gitignore \
-    docker-compose.yml \
-    tests/ \
-    node_modules/
+.git \
+.env.example \
+.gitattributes \
+.gitignore \
+docker-compose.yml \
+tests/ 
 
 # Create necessary directories and set permissions
 RUN mkdir -p \
-    storage/framework/sessions \
-    storage/framework/views \
-    storage/framework/cache \
-    storage/framework/testing \
-    storage/logs \
-    bootstrap/cache \
+storage/framework/sessions \
+storage/framework/views \
+storage/framework/cache \
+storage/framework/testing \
+storage/logs \
+bootstrap/cache \
     && chmod -R a+rw storage bootstrap/cache \
     && chown -R ${WWWUSER}:${WWWGROUP} storage bootstrap/cache \
     && touch storage/logs/.gitkeep \
     && chmod 777 storage/logs
-
+    
 # Install S6-Overlay
 ENV S6_OVERLAY_VERSION=v3.2.0.2
 ENV S6_BEHAVIOUR_IF_STAGE2_FAILS=2
 
 RUN case "$(uname -m)" in \
-    "aarch64") S6_ARCH="aarch64" ;; \
-    "armv7l")  S6_ARCH="armhf" ;; \
-    "armv6l")  S6_ARCH="armhf" ;; \
+"aarch64") S6_ARCH="aarch64" ;; \
+"armv7l")  S6_ARCH="armhf" ;; \
+"armv6l")  S6_ARCH="armhf" ;; \
     "i386")    S6_ARCH="i686" ;; \
     "x86_64")  S6_ARCH="x86_64" ;; \
     "i486")    S6_ARCH="i486" ;; \
@@ -169,10 +173,10 @@ RUN case "$(uname -m)" in \
     && tar -Jxf /tmp/s6-overlay/s6-overlay-symlinks-noarch.tar.xz -C / \
     && tar -Jxf /tmp/s6-overlay/s6-overlay-symlinks-arch.tar.xz -C / \
     && rm -rf /tmp/s6-overlay
-
-# Copy S6-Overlay configuration
+    
+    # Copy S6-Overlay configuration
 COPY docker/s6-overlay/ /etc/s6-overlay/
-
+   
 # Change the user
 USER ${USER}
 
@@ -183,7 +187,8 @@ RUN composer install \
     --no-ansi \
     --no-dev \
     && composer clear-cache
-
+    
+RUN bun install -p --no-cache --ignore-scripts
 # Expose ports
 EXPOSE ${OCTANE_PORT}
 

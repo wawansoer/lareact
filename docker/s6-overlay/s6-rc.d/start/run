@@ -3,9 +3,7 @@
 # Use with-contenv to ensure environment variables are available
 with-contenv
 
-# Change to the application directory
 cd /var/www/html
-
 # Start Octane server with proper variable handling
 foreground {
     php
