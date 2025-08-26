@@ -56,7 +56,8 @@
   },
   "lint-staged": {
     "*.php": [
-      "./vendor/bin/pint"
+      "./vendor/bin/pint",
+      "./vendor/bin/pest"
     ],
     "resources/js/**/*.{js,jsx,ts,tsx}": [
       "prettier --write",
